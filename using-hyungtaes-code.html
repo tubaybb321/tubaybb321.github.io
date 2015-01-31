@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Using Hyungtae's Code</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">Notes To Self </a></h1>
+                <nav><ul>
+                    <li><a href="/category/blog-notes.html">Blog notes</a></li>
+                    <li class="active"><a href="/category/dynamic-belief-fusion.html">Dynamic Belief Fusion</a></li>
+                    <li><a href="/category/theano-notes.html">Theano Notes</a></li>
+                </ul>
+                </nav>
+        </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/using-hyungtaes-code.html" rel="bookmark"
+           title="Permalink to Using Hyungtae's Code">Using Hyungtae's Code</a></h1>
+    </header>
+
+    <div class="entry-content">
+<footer class="post-info">
+        <span>Sat 17 January 2015</span>
+
+</footer><!-- /.post-info -->      <h1>Background</h1>
+<p>Hyungtae's code was written to compare various classifiers and methods of data fusion with his Dynamic Belief Fusion technique. It does this by training 4 different classifiers to search images for the presence of a specified object. The four classifiers are:</p>
+<ol>
+<li>DPM - Deformable Parts Model</li>
+<li>Exemplar SVM - An Ensemble of SVMs, one for each positive example in the training set</li>
+<li>HOG SVM - SVM based on Histogram of Gaussian Features</li>
+<li>SIFT SVM - SVM based upon SIFT features</li>
+</ol>
+<p>The identifiable classes come from the ARL office dataset and are:</p>
+<ol>
+<li>Chair</li>
+<li>Stairs</li>
+<li>Poster</li>
+<li>Window</li>
+<li>Container</li>
+</ol>
+<p>Our interest in Hyungtae's code is to use the results of his fused classifiers to act as a semi-reliable oracle in order to train EEG classifiers. To do this, we needed to write some modified modules, in order to query the fused classifier about individual images, translate its confidence measures into points on a precision-recall curve and to reallocate a dataset into different training, validation and testing sets.</p>
+<h1>Creating Files With Fusion Classifier's Responses To Images</h1>
+<p>The original code relied upon test.m to measure the performance of each classifier and a few different fusing techniques upon the test set. In order to get this information for the validation &amp; testing sets, the functions sg_validate and sg_test were created. Hyungtae's code uses the validation set to determine the best parameters for Dynamic Belief Fusion, as a result the use of the validation set and test set were hard coded in test.m. It was deemed easier, in the immediate term, to make two different functions to get the fusion results for validation and testing sets. </p>
+<p>Both sg_validate and sg_test are used in the same way - e.g.</p>
+<div class="highlight"><pre>sg_test(&#39;chair&#39;)
+</pre></div>
+
+
+<p>will produce the file:</p>
+<div class="highlight"><pre>chairData.mat
+</pre></div>
+
+
+<p>This file will contain the following variables:</p>
+<ol>
+<li>
+<p><em>ap_all</em>: Area under Precision/Recall curve for each individual classifier &amp; fused classifier</p>
+</li>
+<li>
+<p><em>bestu</em>: Best value for Hyungtae's u parameter (used to measure uncertainty of classification)</p>
+</li>
+<li>
+<p><em>bestn</em>: Best value for Hyungtae's n parameter (used to estimate best obtainable precision)</p>
+</li>
+<li>
+<p><em>bestdets</em>: An N x 3 cell, where N = # of images used in the set of interest (validation or test set depending upon whether sg_validate or sg_test used). </p>
+<p>a. The first column contains a cell array with the coordinates (upper, left, lower, right) [check with Hyungtae] of each bounding box found in the given image along with the confidence that the bounding box contains a sample of the class of interest. The cell array is sorted by the confidence parameter.</p>
+<p>b. The second column identifies the image file.</p>
+<p>c. The third column names the class of interest.</p>
+</li>
+<li>
+<p><em>bestprior</em>: a 4x3 array of parameters for each of the base classifiers used by Hyungtae to fuse predictions together. Each row contains the parameters for a particular classifier (I don't know which row corresponds to which classifier). </p>
+<p>a. The first column contains an array 3xM array, where M = # of object detections and the 3 rows respectively contain m(Trgt), m(~Trgt) &amp; m(Uncertain) for various thresholds/confidences. </p>
+<p>b  The second column contains an array with the corresponding thresholds/confidences.</p>
+</li>
+<li>
+<p><em>precRecData</em>:  I modified Hyungtae's code to give this 1 x 3 cell containing precision and recall measures for various confidence thresholds for the given detector.</p>
+<p>a.  The first column contains a 2 x N array, where N corresponds to the number of p/r measurements with </p>
+<div class="highlight"><pre><span class="mf">1.</span> <span class="n">precision</span> <span class="n">measures</span> <span class="n">in</span> <span class="n">the</span> <span class="n">first</span> <span class="n">row</span><span class="p">,</span>
+
+<span class="mf">2.</span> <span class="n">recall</span> <span class="n">measures</span> <span class="n">in</span> <span class="n">the</span> <span class="n">second</span> <span class="n">row</span>
+</pre></div>
+
+
+<p>b. The second column of precRecData contains the confidence thresholds that correspond to the precision &amp; recall measurements. </p>
+<p>c. The third column is empty.</p>
+</li>
+<li>
+<p><em>gnd_truth</em>: An array with ground truth information for each image. If the bounding box (bbox) array is [], then the target object is not in the image, otherwise, bbox contains (leftmost pt, top most pt, right most point, bottom point) for the bounding box [check this]. I don't quite know what det &amp; obj contain, although det=[] seems to indicate no target to detect, but det=0 seems to indicate a target.</p>
+</li>
+</ol>
+<p>This file should then be copied into the TestSetResults directory. In order to create these files for all 5 classes, just run:</p>
+<div class="highlight"><pre>sg_tests()
+</pre></div>
+
+
+<p>and then move the resulting files to ./TestSetResults. For the validation set, the corresponding sg_validate &amp; sg_validates work in the same way.</p>
+<h1>Obtaining Fused Classifier's Response To A Particular Image</h1>
+<p>To see if the fused classifier detected a particular class within a particular image, use the function <em>sg_oracle</em>, which has this signature:</p>
+<div class="highlight"><pre><span class="p">[</span><span class="n">best_result</span><span class="p">,</span> <span class="n">precRecCurves</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">gt_bb</span><span class="p">,</span> <span class="n">ov</span><span class="p">]</span> <span class="o">=</span> <span class="n">sg_oracle</span><span class="p">(</span> <span class="n">im_name</span><span class="p">,</span> <span class="n">class</span><span class="p">)</span>
+</pre></div>
+
+
+<p>For example,</p>
+<div class="highlight"><pre><span class="p">[</span><span class="n">best_result</span><span class="p">,</span> <span class="n">precRecCurves</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">gt_bb</span><span class="p">,</span> <span class="n">ov</span><span class="p">]</span> <span class="o">=</span> <span class="n">sg_oracle</span><span class="p">(</span> <span class="err">&#39;</span><span class="mf">10053.</span><span class="n">jpg</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">chair</span><span class="err">&#39;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Here, <em>best_result</em> will return a 1x5 array, containing the coordinates of the bounding box most likely to contain the object in question followed by the confidence that it does. <em>precRecCurves</em> is a 2xN array with precision values in the first row and recall values in the second row. <em>thresholds</em> is a 1xN array containing the confidence values corresponding to those precision and recall values. So, if one decided to accept all responses with a confidence greater or equal to the m^{th} value in <em>thresholds</em>, then one should expect precision and recall values that are equal to the m^{th} entries in <em>precRecCurves</em>. Finally, <em>gt_bb</em> is the ground truth bounding box(es) and <em>ov</em> is a list of overlap measurements between the most-likely box found by the fuser and each bounding box. The measure of overlap is (Area of Intersection) / (Area of Union).  </p>
+<h1>Creating New Train/Validation/Test Set Divisions</h1>
+<p>In SG_data_split_test is the function shuffle_data. The arguments to this function are:</p>
+<ol>
+<li>Name of the output matix</li>
+<li>Number of parts in training set</li>
+<li>Number of parts in validation set</li>
+<li>Number of parts in test set</li>
+</ol>
+<p>Example:</p>
+<div class="highlight"><pre>shuffleData(4,2,2,&#39;data_4_2_2.mat&#39;)
+</pre></div>
+
+
+<p>Note: This needs to be made to conform to existing configuration for EEG learner</p>
+    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <p>Powered by <a href="http://getpelican.com/">Pelican</a>. Theme <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>

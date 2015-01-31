@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Initial Theano Notes</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">Notes To Self </a></h1>
+                <nav><ul>
+                    <li><a href="/category/blog-notes.html">Blog notes</a></li>
+                    <li class="active"><a href="/category/theano-scan.html">Theano - Scan</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/initial-theano-notes.html" rel="bookmark"
+           title="Permalink to Initial Theano Notes">Initial Theano Notes</a></h1>
+    </header>
+
+    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2015-01-10T11:10:00+01:00">
+                Published: Sat 10 January 2015
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/moonshine-mulligan.html">Moonshine Mulligan</a>
+        </address>
+<p>In <a href="/category/theano-scan.html">Theano - Scan</a>. </p>
+
+</footer><!-- /.post-info -->      <div class="highlight"><pre><span class="nx">me</span><span class="p">@</span><span class="nx">Bedrock1</span><span class="p">:</span><span class="err">~$</span> <span class="nx">python</span>
+<span class="nx">Python</span> <span class="mf">2.7.6</span> <span class="p">(</span><span class="nb">default</span><span class="p">,</span> <span class="nx">Mar</span> <span class="mi">22</span> <span class="mi">2014</span><span class="p">,</span> <span class="mi">22</span><span class="p">:</span><span class="mi">59</span><span class="p">:</span><span class="mi">56</span><span class="p">)</span> 
+<span class="err">[</span><span class="nx">GCC</span> <span class="mf">4.8.2</span><span class="cp">]</span> on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; import theano.tensor as T
+&gt;&gt;&gt; from theano import function
+&gt;&gt;&gt; from theano import shared
+&gt;&gt;&gt; import theano
+&gt;&gt;&gt; X = T.ivector(&#39;X&#39;)
+&gt;&gt;&gt; res, ups = theano.scan(lambda x: x + 1, sequences=X)
+&gt;&gt;&gt; inc=function(<span class="cp">[</span><span class="nx">X</span><span class="cp">]</span>,res)
+/usr/local/lib/python2.7/dist-packages/theano/tensor/subtensor.py:110: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future.
+  start in <span class="cp">[</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="cp">]</span> or
+&gt;&gt;&gt; inc(<span class="cp">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="cp">]</span>)
+array(<span class="cp">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="cp">]</span>, dtype=int32)
+&gt;&gt;&gt; Y = shared(0)
+&gt;&gt;&gt; Y.dtype
+&#39;int64&#39;
+&gt;&gt;&gt; resy, upsy = theano.scan(lambda x:{Y:(Y+x)}, sequences=X)
+&gt;&gt;&gt; acc=function(<span class="cp">[</span><span class="nx">X</span><span class="cp">]</span>,<span class="cp">[]</span>,updates=upsy)
+/usr/local/lib/python2.7/dist-packages/theano/tensor/opt.py:2165: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future.
+  if (replace_x == replace_y and
+/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan_perform_ext.py:85: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
+  from scan_perform.scan_perform import *
+&gt;&gt;&gt; Y.get_value()
+array(0)
+&gt;&gt;&gt; acc(<span class="cp">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="cp">]</span>)
+<span class="cp">[]</span>
+&gt;&gt;&gt; Y.get_value()
+array(10)
+&gt;&gt;&gt; acc2 =function(<span class="cp">[</span><span class="nx">X</span><span class="cp">]</span>,<span class="cp">[</span><span class="nx">resy</span><span class="cp">]</span>,updates=upsy)
+Traceback (most recent call last):
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 1, in <span class="nt">&lt;module&gt;</span>
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/function.py&quot;, line 223, in function
+profile=profile)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 490, in pfunc
+no_default_updates=no_default_updates)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 237, in rebuild_collect_shared
++ &#39; of type &#39; + str(type(v)))
+TypeError: Outputs must be theano Variable or Out instances. Received None of type <span class="nt">&lt;type</span> <span class="err">&#39;</span><span class="na">NoneType</span><span class="err">&#39;</span><span class="nt">&gt;</span>
+&gt;&gt;&gt; resy
+&gt;&gt;&gt; type(resy)
+<span class="nt">&lt;type</span> <span class="err">&#39;</span><span class="na">NoneType</span><span class="err">&#39;</span><span class="nt">&gt;</span>
+&gt;&gt;&gt; X2 = T.imatrix(&#39;X2&#39;)
+&gt;&gt;&gt; res2, ups2 = theano.scan(lambda x: x + 1, sequences=X2)
+&gt;&gt;&gt; inc2=function(<span class="cp">[</span><span class="nx">X2</span><span class="cp">]</span>,res2)
+
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; inc2(np.array(<span class="cp">[</span><span class="err">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="cp">]</span>,<span class="cp">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="cp">]</span>]))
+Traceback (most recent call last):
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 1, in <span class="nt">&lt;module&gt;</span>
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/function_module.py&quot;, line 497, in __call__
+allow_downcast=s.allow_downcast)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/tensor/type.py&quot;, line 119, in filter
+raise TypeError(err_msg, data)
+TypeError: (&#39;Bad input argument to theano function at index 0(0-based)&#39;, &#39;TensorType(int32, matrix) cannot store a value of dtype int64 without risking loss of precision. If you do not mind this loss, you can: 1) explicitly cast your data to int32, or 2) set &quot;allow_input_downcast=True&quot; when calling &quot;function&quot;.&#39;, array(<span class="cp">[</span><span class="err">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="cp">]</span>,
+   <span class="cp">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="cp">]</span>]))
+&gt;&gt;&gt; inc2=function(<span class="cp">[</span><span class="nx">X2</span><span class="cp">]</span>,res2,allow_input_downcast=True)
+&gt;&gt;&gt; inc2(np.array(<span class="cp">[</span><span class="err">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="cp">]</span>,<span class="cp">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="cp">]</span>]))
+array(<span class="cp">[</span><span class="err">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="cp">]</span>,
+   <span class="cp">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="cp">]</span>], dtype=int32)
+&gt;&gt;&gt; resy2, upsy2 = theano.scan(lambda x:{Y:(Y+x)}, sequences=X2)
+Traceback (most recent call last):
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 1, in <span class="nt">&lt;module&gt;</span>
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 803, in scan
+profile=False)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/function.py&quot;, line 223, in function
+profile=profile)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 490, in pfunc
+no_default_updates=no_default_updates)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 217, in rebuild_collect_shared
+raise TypeError(err_msg, err_sug)
+TypeError: (&#39;An update must have the same type as the original shared variable (shared_var=<span class="nt">&lt;TensorType</span><span class="err">(</span><span class="na">int64</span><span class="err">,</span> <span class="na">scalar</span><span class="err">)</span><span class="nt">&gt;</span>, shared_var.type=TensorType(int64, scalar), update_val=Elemwise{add,no_inplace}.0, update_val.type=TensorType(int64, vector)).&#39;, &#39;If the difference is related to the broadcast pattern, you can call the tensor.unbroadcast(var, axis_to_unbroadcast<span class="cp">[</span><span class="p">,</span> <span class="nx">...</span><span class="cp">]</span>) function to remove broadcastable dimensions.&#39;)
+&gt;&gt;&gt; X = T.matrix(&#39;X&#39;)
+&gt;&gt;&gt; floatX=&#39;float32&#39;
+&gt;&gt;&gt; results, updates = theano.scan(lambda i, j, t_f: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span> + t_f, floatX),
+sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... &gt;&gt;&gt; 
+&gt;&gt;&gt; compute_trace = theano.function(inputs=<span class="cp">[</span><span class="nx">X</span><span class="cp">]</span>, outputs=<span class="cp">[</span><span class="nb">results</span><span class="cp">]</span>)
+&gt;&gt;&gt; x = np.eye(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x<span class="cp">[</span><span class="mi">0</span><span class="cp">]</span> = np.arange(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x
+array(<span class="cp">[</span><span class="err">[</span> <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">2</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">3</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">4</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span> <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span> <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span> <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span> <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">1</span><span class="nx">.</span><span class="cp">]</span>], dtype=float32)
+&gt;&gt;&gt; compute_trace(x)
+<span class="cp">[</span><span class="kt">array</span><span class="p">(</span><span class="err">[</span> <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">2</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">3</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">4</span><span class="nx">.</span><span class="cp">]</span>, dtype=float32)]
+&gt;&gt;&gt; x<span class="cp">[</span><span class="mi">0</span><span class="cp">][</span><span class="mi">0</span><span class="cp">]</span>
+0.0
+&gt;&gt;&gt; x<span class="cp">[</span><span class="mi">0</span><span class="cp">][</span><span class="mi">0</span><span class="cp">]</span>=77
+&gt;&gt;&gt; compute_trace(x)
+<span class="cp">[</span><span class="kt">array</span><span class="p">(</span><span class="err">[</span> <span class="mi">77</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">78</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">79</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">80</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">81</span><span class="nx">.</span><span class="cp">]</span>, dtype=float32)]
+&gt;&gt;&gt; results2, updates2 = theano.scan(lambda i, j, huh: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span> + huh, floatX),
+sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... &gt;&gt;&gt; 
+&gt;&gt;&gt; compute_trace2 = theano.function(inputs=<span class="cp">[</span><span class="nx">X</span><span class="cp">]</span>, outputs=<span class="cp">[</span><span class="nx">results2</span><span class="cp">]</span>)
+&gt;&gt;&gt; x2 = np.eye(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x2<span class="cp">[</span><span class="mi">0</span><span class="cp">][</span><span class="mi">0</span><span class="cp">]</span>=55
+&gt;&gt;&gt; compute_trace(x2)
+<span class="cp">[</span><span class="kt">array</span><span class="p">(</span><span class="err">[</span> <span class="mi">55</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">56</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">57</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">58</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">59</span><span class="nx">.</span><span class="cp">]</span>, dtype=float32)]
+&gt;&gt;&gt; 
+&gt;&gt;&gt; 
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span>, floatX),
+sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... Traceback (most recent call last):
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 4, in <span class="nt">&lt;module&gt;</span>
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 732, in scan
+condition, outputs, updates = scan_utils.get_updates_and_outputs(fn(*args))
+TypeError: <span class="nt">&lt;lambda&gt;</span>() takes exactly 2 arguments (3 given)
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span>, floatX),
+sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... Traceback (most recent call last):
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 3, in <span class="nt">&lt;module&gt;</span>
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 732, in scan
+condition, outputs, updates = scan_utils.get_updates_and_outputs(fn(*args))
+TypeError: <span class="nt">&lt;lambda&gt;</span>() takes exactly 2 arguments (3 given)
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span>, floatX), sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)])
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 1
+results3, updates3 = theano.scan(lambda i, j: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span>, floatX), sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)])
+^
+IndentationError: unexpected indent
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span>, floatX), sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)])
+&gt;&gt;&gt; np.asarray(0., dtype=floatX)
+array(0.0, dtype=float32)
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j, huh: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span> + huh, floatX),
+sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],
+outputs_info=np.asarray(20., dtype=floatX))
+... ... &gt;&gt;&gt; 
+&gt;&gt;&gt; compute_trace3 = theano.function(inputs=<span class="cp">[</span><span class="nx">X</span><span class="cp">]</span>, outputs=<span class="cp">[</span><span class="nx">results3</span><span class="cp">]</span>)
+&gt;&gt;&gt; x3 = np.eye(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x3<span class="cp">[</span><span class="mi">0</span><span class="cp">][</span><span class="mi">0</span><span class="cp">]</span>=87
+&gt;&gt;&gt; x3
+array(<span class="cp">[</span><span class="err">[</span> <span class="mi">87</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">1</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="cp">]</span>,
+   <span class="cp">[</span>  <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">0</span><span class="nx">.</span><span class="p">,</span>   <span class="mi">1</span><span class="nx">.</span><span class="cp">]</span>], dtype=float32)
+&gt;&gt;&gt; compute_trace3(x3)
+<span class="cp">[</span><span class="kt">array</span><span class="p">(</span><span class="err">[</span> <span class="mi">107</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">108</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">109</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">110</span><span class="nx">.</span><span class="p">,</span>  <span class="mi">111</span><span class="nx">.</span><span class="cp">]</span>, dtype=float32)]
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j, uh, huh: T.cast(X<span class="cp">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span> + huh + 2*uh, floatX), sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],outputs_info=<span class="cp">[</span><span class="nx">np.asarray</span><span class="p">(</span><span class="mi">1</span><span class="nx">.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nx">floatX</span><span class="p">)),</span> <span class="nx">np.asarray</span><span class="p">(</span><span class="mi">2</span><span class="nx">.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nx">floatX</span><span class="p">))</span>
+  <span class="nb">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="nb">line</span> <span class="mi">1</span>
+<span class="nx">results3</span><span class="p">,</span> <span class="n">updates3</span> <span class="o">=</span> <span class="nx">theano.scan</span><span class="p">(</span><span class="nx">lambda</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="nx">uh</span><span class="p">,</span> <span class="nx">huh</span><span class="p">:</span> <span class="nx">T.cast</span><span class="p">(</span><span class="nx">X</span><span class="err">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span> + huh + 2*uh, floatX), sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],outputs_info=<span class="cp">[</span><span class="nx">np.asarray</span><span class="p">(</span><span class="mi">1</span><span class="nx">.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nx">floatX</span><span class="p">)),</span> <span class="nx">np.asarray</span><span class="p">(</span><span class="mi">2</span><span class="nx">.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nx">floatX</span><span class="p">))</span>
+                                                                                                  <span class="p">^</span>
+<span class="nx">SyntaxError</span><span class="p">:</span> <span class="nx">invalid</span> <span class="nx">syntax</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nx">results3</span><span class="p">,</span> <span class="n">updates3</span> <span class="o">=</span> <span class="nx">theano.scan</span><span class="p">(</span><span class="nx">lambda</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="nx">uh</span><span class="p">,</span> <span class="nx">huh</span><span class="p">:</span> <span class="nx">T.cast</span><span class="p">(</span><span class="nx">X</span><span class="err">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="cp">]</span> + huh + 2*uh, floatX), sequences=<span class="cp">[</span><span class="nx">T.arange</span><span class="p">(</span><span class="nx">X.shape</span><span class="err">[</span><span class="mi">0</span><span class="cp">]</span>), T.arange(X.shape<span class="cp">[</span><span class="mi">1</span><span class="cp">]</span>)],outputs_info=<span class="cp">[</span> <span class="nx">np.asarray</span><span class="p">(</span><span class="mi">1</span><span class="nx">.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nx">floatX</span><span class="p">),</span> <span class="nx">np.asarray</span><span class="p">(</span><span class="mi">2</span><span class="nx">.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nx">floatX</span><span class="p">)</span><span class="cp">]</span>)
+Traceback (most recent call last):
+  File &quot;<span class="nt">&lt;stdin&gt;</span>&quot;, line 1, in <span class="nt">&lt;module&gt;</span>
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 820, in scan
+raise ValueError(&#39;Please provide None as outputs_info for &#39;
+ValueError: Please provide None as outputs_info for any output that does not feed back into scan (i.e. it behaves like a map) 
+&gt;&gt;&gt;
+</pre></div>
+    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>

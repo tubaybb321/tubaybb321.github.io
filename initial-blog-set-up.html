@@ -15,7 +15,10 @@
                 <h1><a href="/">Notes To Self </a></h1>
                 <nav><ul>
                     <li class="active"><a href="/category/blog-notes.html">Blog notes</a></li>
-                </ul></nav>
+                    <li><a href="/category/dynamic-belief-fusion.html">Dynamic Belief Fusion</a></li>
+                    <li><a href="/category/theano-notes.html">Theano Notes</a></li>
+                </ul>
+                </nav>
         </header><!-- /#banner -->
 <section id="content" class="body">
   <article>
@@ -27,14 +30,7 @@
 
     <div class="entry-content">
 <footer class="post-info">
-        <abbr class="published" title="2014-12-19T11:10:00+01:00">
-                Published: Fri 19 December 2014
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/moonshine-mulligan.html">Moonshine Mulligan</a>
-        </address>
-<p>In <a href="/category/blog-notes.html">Blog notes</a>. </p>
+        <span>Fri 19 December 2014</span>
 
 </footer><!-- /.post-info -->      <h1>Initial experiment with Pelican blogging system</h1>
 <p>I started by installing Pelican and Markdown, since I intended to write my Pelican content in Markdown:</p>
@@ -108,8 +104,9 @@ me@Bedrock1:~/Projects/PelicanProjects/test2$ tree
 </pre></div>
 
 
-<p>Now, I can test my blog on localhost to see a blank entry and convince
-myself that the machinery of the blog is working, by using one of the
+<h1>Testing Blog</h1>
+<p>Now, I can test my blog on localhost (i.e. http://localhost:8000) to see a blank entry and convince
+myself that the machinery of the blog is working, by using one of these
 commands from the Makefile:</p>
 <div class="highlight"><pre>me@Bedrock1:~/Projects/PelicanProjects/test2$ make serve
 cd /home/me/Projects/PelicanProjects/test2/output &amp;&amp; python -m pelican.server
@@ -120,8 +117,41 @@ WARNING:root:Unable to find file /favicon.ico/index.html or variations.
 </pre></div>
 
 
+<p>My other option is:</p>
+<div class="highlight"><pre>me@Bedrock1:~/Projects/PelicanProjects/test1$ make devserver
+/home/me/Projects/PelicanProjects/test1/develop_server.sh restart
+Stale PID, deleting
+Stale PID, deleting
+Starting up Pelican and HTTP server
+DEBUG: Adding current directory to system path
+DEBUG: Temporarily adding PLUGIN_PATHS to system path
+DEBUG: Restoring system path
+  --- AutoReload Mode: Monitoring `content`, `theme` and `settings` for changes. ---
+
+-&gt; Modified: content, theme, settings. re-generating...
+DEBUG: Template list: [u&#39;!simple/archives.html&#39;, u&#39;!simple/article.html&#39;, u&#39;!simple/author.html&#39;, u&#39;!simple/authors.html&#39;, u&#39;!simple/base.html&#39;, u&#39;!simple/categories.html&#39;, u&#39;!simple/category.html&#39;, u&#39;!simple/gosquared.html&#39;, u&#39;!simple/index.html&#39;, u&#39;!simple/page.html&#39;, u&#39;!simple/pagination.html&#39;, u&#39;!simple/period_archives.html&#39;, u&#39;!simple/tag.html&#39;, u&#39;!simple/tags.html&#39;, u&#39;!simple/translations.html&#39;, u&#39;analytics.html&#39;, u&#39;archives.html&#39;, u&#39;article.html&#39;, u&#39;article_infos.html&#39;, u&#39;author.html&#39;, u&#39;authors.html&#39;, u&#39;base.html&#39;, u&#39;categories.html&#39;, u&#39;category.html&#39;, u&#39;comments.html&#39;, u&#39;disqus_script.html&#39;, u&#39;github.html&#39;, u&#39;gosquared.html&#39;, u&#39;index.html&#39;, u&#39;page.html&#39;, u&#39;pagination.html&#39;, u&#39;period_archives.html&#39;, u&#39;piwik.html&#39;, u&#39;tag.html&#39;, u&#39;taglist.html&#39;, u&#39;tags.html&#39;, u&#39;translations.html&#39;, u&#39;twitter.html&#39;]
+DEBUG: Read file sample1.md -&gt; Article
+DEBUG: Signal article_generator_preread.send(ArticlesGenerator)
+DEBUG: Signal article_generator_context.send(ArticlesGenerator, &lt;metadata&gt;)
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/initial-blog-set-up.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/index.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/tags.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/categories.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/authors.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/archives.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/category/blog-notes.html
+-&gt; Writing /home/me/Projects/PelicanProjects/test1/output/author/moonshine-mulligan.html
+Done: Processed 1 article(s), 0 draft(s) and 0 page(s) in 0.10 seconds.
+Pelican and HTTP server processes now running in background.
+</pre></div>
+
+
+<p>Running in the background is useful, since now I can still use my terminal. This is particularly helpful if I want to add content. Using my same window I can enter the command to convert (i.e. make html) the md (i.e. Markdown) files in the content directory to html and the immediately see it on my local server. I just need to refresh the page on the browser.</p>
+<h1>Placing Blog In A Repository And On Internet</h1>
 <p>Next, I wanted to create a GitHub repository. Since this was not going
 to be associated with a project, I decided to use a GitHub user page.</p>
+<h2>Git Repository</h2>
+<h3>Creating Local Repository</h3>
 <div class="highlight"><pre>me@Bedrock1:~/Projects/PelicanProjects/test1/output$ git init
 Initialized empty Git repository in /home/me/Projects/PelicanProjects/test1/output/.git/
 me@Bedrock1:~/Projects/PelicanProjects/test1/output$ git add --all
@@ -207,8 +237,21 @@ me@Bedrock1:~/Projects/PelicanProjects/test1/output$ git commit -m &quot;Initial
  create mode 100644 theme/images/icons/twitter.png
  create mode 100644 theme/images/icons/vimeo.png
  create mode 100644 theme/images/icons/youtube.png
+</pre></div>
 
-me@Bedrock1:~/Projects/PelicanProjects/test1/output$ git remote add origin https://github.com/tubaybb321/tubaybb321.github.io.git
+
+<h3>Creating Remote Repository</h3>
+<p>At this point, I had my local repository. The next step was to create
+a remote repository, which would not only back things up remotely, but
+would also (in this case) create a web page. So, I went to github.com, created an account and then found myself facing this page:</p>
+<p><img src="/GitHubShot1a.png" alt="/GitHubShot1.png" style="width: 750px; height: 800px;"/></p>
+<p>When I selected the area I've circled in red, a drop-down menu appeared, allowing me to create a new repository., which took me to the following page:</p>
+<p><img src="/GitHubShot2.png" alt="/GitHubShot2.png" style="width: 750px; height: 800px;"/></p>
+<p>Apparently, GitHub will allow 1 User/Organization page, which seems to be associated with pages not attached to any particular project, and as many Project pages as one wants. Since these webpages are purely a set of notes to myself, a User page seemed more appropriate. To create a user page, I just declared the repository name to be <my username>.github.io - tubaybb321.github.io, which is now the web address of these pages. Once this repository was created, I got taken to the following page:</p>
+<p><img src="/GitHubShot3a.png" alt="/GitHubShot3.png" style="width: 750px; height: 800px;"/></p>
+<p>Clicking on the circled button copies the web address of my new page to the clipboard, which made it easier to upload the webpages I'd created in this way:</p>
+<h2>Updating GitHub Repository</h2>
+<div class="highlight"><pre>me@Bedrock1:~/Projects/PelicanProjects/test1/output$ git remote add origin https://github.com/tubaybb321/tubaybb321.github.io.git #Only necessary when first connecting local repository to remote repository
 me@Bedrock1:~/Projects/PelicanProjects/test1/output$ git push origin master
 Username for &#39;https://github.com&#39;: tubaybb321
 Password for &#39;https://tubaybb321@github.com&#39;:
@@ -247,11 +290,7 @@ me@Bedrock1:~/Projects/PelicanProjects/test1/output$
         </section><!-- /#extras -->
 
         <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
-
-                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                <p>Powered by <a href="http://getpelican.com/">Pelican</a>. Theme <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
         </footer><!-- /#contentinfo -->
 
 </body>

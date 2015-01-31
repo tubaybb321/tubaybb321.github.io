@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Notes To Self - Theano Notes</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">Notes To Self </a></h1>
+                <nav><ul>
+                    <li><a href="/category/blog-notes.html">Blog notes</a></li>
+                    <li><a href="/category/dynamic-belief-fusion.html">Dynamic Belief Fusion</a></li>
+                    <li class="active"><a href="/category/theano-notes.html">Theano Notes</a></li>
+                </ul>
+                </nav>
+        </header><!-- /#banner -->
+
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="/initial-theano-notes-scan.html">Initial Theano Notes - Scan</a></h1>
+<footer class="post-info">
+        <span>Sat 10 January 2015</span>
+
+</footer><!-- /.post-info --><div class="highlight"><pre>me@Bedrock1:~$ python
+Python 2.7.6 (default, Mar 22 2014, 22:59:56) 
+[GCC 4.8.2] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; import theano.tensor as T
+&gt;&gt;&gt; from theano import function
+&gt;&gt;&gt; from theano import shared
+&gt;&gt;&gt; import theano
+&gt;&gt;&gt; X = T.ivector(&#39;X&#39;)
+&gt;&gt;&gt; res, ups = theano.scan(lambda x: x + 1, sequences=X)
+&gt;&gt;&gt; inc=function([X],res)
+/usr/local/lib/python2.7/dist-packages/theano/tensor/subtensor.py:110: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future.
+  start in [None, 0] or
+&gt;&gt;&gt; inc([1,2,3])
+array([2, 3, 4], dtype=int32)
+&gt;&gt;&gt; Y = shared(0)
+&gt;&gt;&gt; Y.dtype
+&#39;int64&#39;
+&gt;&gt;&gt; resy, upsy = theano.scan(lambda x:{Y:(Y+x)}, sequences=X)
+&gt;&gt;&gt; acc=function([X],[],updates=upsy)
+/usr/local/lib/python2.7/dist-packages/theano/tensor/opt.py:2165: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future.
+  if (replace_x == replace_y and
+/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan_perform_ext.py:85: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
+  from scan_perform.scan_perform import *
+&gt;&gt;&gt; Y.get_value()
+array(0)
+&gt;&gt;&gt; acc([1,2,3,4])
+[]
+&gt;&gt;&gt; Y.get_value()
+array(10)
+&gt;&gt;&gt; acc2 =function([X],[resy],updates=upsy)
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/function.py&quot;, line 223, in function
+profile=profile)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 490, in pfunc
+no_default_updates=no_default_updates)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 237, in rebuild_collect_shared
++ &#39; of type &#39; + str(type(v)))
+TypeError: Outputs must be theano Variable or Out instances. Received None of type &lt;type &#39;NoneType&#39;&gt;
+&gt;&gt;&gt; resy
+&gt;&gt;&gt; type(resy)
+&lt;type &#39;NoneType&#39;&gt;
+&gt;&gt;&gt; X2 = T.imatrix(&#39;X2&#39;)
+&gt;&gt;&gt; res2, ups2 = theano.scan(lambda x: x + 1, sequences=X2)
+&gt;&gt;&gt; inc2=function([X2],res2)
+
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; inc2(np.array([[1,2],[4,5]]))
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/function_module.py&quot;, line 497, in __call__
+allow_downcast=s.allow_downcast)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/tensor/type.py&quot;, line 119, in filter
+raise TypeError(err_msg, data)
+TypeError: (&#39;Bad input argument to theano function at index 0(0-based)&#39;, &#39;TensorType(int32, matrix) cannot store a value of dtype int64 without risking loss of precision. If you do not mind this loss, you can: 1) explicitly cast your data to int32, or 2) set &quot;allow_input_downcast=True&quot; when calling &quot;function&quot;.&#39;, array([[1, 2],
+   [4, 5]]))
+&gt;&gt;&gt; inc2=function([X2],res2,allow_input_downcast=True)
+&gt;&gt;&gt; inc2(np.array([[1,2],[4,5]]))
+array([[2, 3],
+   [5, 6]], dtype=int32)
+&gt;&gt;&gt; resy2, upsy2 = theano.scan(lambda x:{Y:(Y+x)}, sequences=X2)
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 803, in scan
+profile=False)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/function.py&quot;, line 223, in function
+profile=profile)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 490, in pfunc
+no_default_updates=no_default_updates)
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/compile/pfunc.py&quot;, line 217, in rebuild_collect_shared
+raise TypeError(err_msg, err_sug)
+TypeError: (&#39;An update must have the same type as the original shared variable (shared_var=&lt;TensorType(int64, scalar)&gt;, shared_var.type=TensorType(int64, scalar), update_val=Elemwise{add,no_inplace}.0, update_val.type=TensorType(int64, vector)).&#39;, &#39;If the difference is related to the broadcast pattern, you can call the tensor.unbroadcast(var, axis_to_unbroadcast[, ...]) function to remove broadcastable dimensions.&#39;)
+&gt;&gt;&gt; X = T.matrix(&#39;X&#39;)
+&gt;&gt;&gt; floatX=&#39;float32&#39;
+&gt;&gt;&gt; results, updates = theano.scan(lambda i, j, t_f: T.cast(X[i, j] + t_f, floatX),
+sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... &gt;&gt;&gt; 
+&gt;&gt;&gt; compute_trace = theano.function(inputs=[X], outputs=[results])
+&gt;&gt;&gt; x = np.eye(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x[0] = np.arange(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x
+array([[ 0.,  1.,  2.,  3.,  4.],
+   [ 0.,  1.,  0.,  0.,  0.],
+   [ 0.,  0.,  1.,  0.,  0.],
+   [ 0.,  0.,  0.,  1.,  0.],
+   [ 0.,  0.,  0.,  0.,  1.]], dtype=float32)
+&gt;&gt;&gt; compute_trace(x)
+[array([ 0.,  1.,  2.,  3.,  4.], dtype=float32)]
+&gt;&gt;&gt; x[0][0]
+0.0
+&gt;&gt;&gt; x[0][0]=77
+&gt;&gt;&gt; compute_trace(x)
+[array([ 77.,  78.,  79.,  80.,  81.], dtype=float32)]
+&gt;&gt;&gt; results2, updates2 = theano.scan(lambda i, j, huh: T.cast(X[i, j] + huh, floatX),
+sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... &gt;&gt;&gt; 
+&gt;&gt;&gt; compute_trace2 = theano.function(inputs=[X], outputs=[results2])
+&gt;&gt;&gt; x2 = np.eye(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x2[0][0]=55
+&gt;&gt;&gt; compute_trace(x2)
+[array([ 55.,  56.,  57.,  58.,  59.], dtype=float32)]
+&gt;&gt;&gt; 
+&gt;&gt;&gt; 
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X[i, j], floatX),
+sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 4, in &lt;module&gt;
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 732, in scan
+condition, outputs, updates = scan_utils.get_updates_and_outputs(fn(*args))
+TypeError: &lt;lambda&gt;() takes exactly 2 arguments (3 given)
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X[i, j], floatX),
+sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],
+outputs_info=np.asarray(0., dtype=floatX))
+... ... Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 3, in &lt;module&gt;
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 732, in scan
+condition, outputs, updates = scan_utils.get_updates_and_outputs(fn(*args))
+TypeError: &lt;lambda&gt;() takes exactly 2 arguments (3 given)
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X[i, j], floatX), sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])])
+  File &quot;&lt;stdin&gt;&quot;, line 1
+results3, updates3 = theano.scan(lambda i, j: T.cast(X[i, j], floatX), sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])])
+^
+IndentationError: unexpected indent
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j: T.cast(X[i, j], floatX), sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])])
+&gt;&gt;&gt; np.asarray(0., dtype=floatX)
+array(0.0, dtype=float32)
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j, huh: T.cast(X[i, j] + huh, floatX),
+sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],
+outputs_info=np.asarray(20., dtype=floatX))
+... ... &gt;&gt;&gt; 
+&gt;&gt;&gt; compute_trace3 = theano.function(inputs=[X], outputs=[results3])
+&gt;&gt;&gt; x3 = np.eye(5, dtype=theano.config.floatX)
+&gt;&gt;&gt; x3[0][0]=87
+&gt;&gt;&gt; x3
+array([[ 87.,   0.,   0.,   0.,   0.],
+   [  0.,   1.,   0.,   0.,   0.],
+   [  0.,   0.,   1.,   0.,   0.],
+   [  0.,   0.,   0.,   1.,   0.],
+   [  0.,   0.,   0.,   0.,   1.]], dtype=float32)
+&gt;&gt;&gt; compute_trace3(x3)
+[array([ 107.,  108.,  109.,  110.,  111.], dtype=float32)]
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j, uh, huh: T.cast(X[i, j] + huh + 2*uh, floatX), sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],outputs_info=[np.asarray(1., dtype=floatX)), np.asarray(2., dtype=floatX))
+  File &quot;&lt;stdin&gt;&quot;, line 1
+results3, updates3 = theano.scan(lambda i, j, uh, huh: T.cast(X[i, j] + huh + 2*uh, floatX), sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],outputs_info=[np.asarray(1., dtype=floatX)), np.asarray(2., dtype=floatX))
+                                                                                                  ^
+SyntaxError: invalid syntax
+&gt;&gt;&gt; results3, updates3 = theano.scan(lambda i, j, uh, huh: T.cast(X[i, j] + huh + 2*uh, floatX), sequences=[T.arange(X.shape[0]), T.arange(X.shape[1])],outputs_info=[ np.asarray(1., dtype=floatX), np.asarray(2., dtype=floatX)])
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;/usr/local/lib/python2.7/dist-packages/theano/scan_module/scan.py&quot;, line 820, in scan
+raise ValueError(&#39;Please provide None as outputs_info for &#39;
+ValueError: Please provide None as outputs_info for any output that does not feed back into scan (i.e. it behaves like a map) 
+&gt;&gt;&gt;
+</pre></div>                </article>
+<p class="paginator">
+    Page 1 / 1
+</p>
+            </aside><!-- /#featured -->
+            </ol><!-- /#posts-list -->
+            </section><!-- /#content -->
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <p>Powered by <a href="http://getpelican.com/">Pelican</a>. Theme <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>

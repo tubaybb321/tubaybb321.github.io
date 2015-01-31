@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Using Hyungtae Code</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">Notes To Self </a></h1>
+                <nav><ul>
+                    <li><a href="/category/blog-notes.html">Blog notes</a></li>
+                    <li class="active"><a href="/category/dynamic-belief-fusion.html">Dynamic Belief Fusion</a></li>
+                    <li><a href="/category/theano-notes.html">Theano Notes</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/using-hyungtae-code.html" rel="bookmark"
+           title="Permalink to Using Hyungtae Code">Using Hyungtae Code</a></h1>
+    </header>
+
+    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2015-01-17T11:10:00+01:00">
+                Published: Sat 17 January 2015
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/moonshine-mulligan.html">Moonshine Mulligan</a>
+        </address>
+<p>In <a href="/category/dynamic-belief-fusion.html">Dynamic Belief Fusion</a>. </p>
+
+</footer><!-- /.post-info -->      <h1>Background</h1>
+<p>Hyungtae's code was written to compare various classifiers and methods of data fusion with his Dynamic Belief Fusion technique. He does this by training 4 different classifiers to search images for the presence of a specified object. The four classifiers are:</p>
+<ol>
+<li>DPM - Deformable Parts Model</li>
+<li>Exemplar SVM - An Ensemble of SVMs, one for each positive example in the training set</li>
+<li>HOG SVM - SVM based on Histogram of Gaussian Features</li>
+<li>SIFT SVM - SVM based upon SIFT features</li>
+</ol>
+<p>The identifiable classes come from the ARL office dataset and are:</p>
+<ol>
+<li>Chair</li>
+<li>Stairs</li>
+<li>Poster</li>
+<li>Window</li>
+<li>Container</li>
+</ol>
+<p>Our interest in Hyungtae's code is to use the results of his fused classifiers to act as a semi-reliable oracle in order to train EEG classifiers. To do this, we needed to write some modified modules, in order to query the fused classifier about individual images, translate its confidence measures into points on a precision-recall curve and to reallocate a dataset into different training, validation and testing sets.</p>
+<h1>Creating Files With Image Information</h1>
+<p>The original code relied upon test.m to measure the performance of each classifier and a few different fusing techniques upon the test set. In order to get this information for the validation &amp; testing sets, the functions sg_validate and sg_test were created. Hyungtae's code uses the validation set to determine the best parameters for Dynamic Belief Fusion, as a result the use of the validation set and test set were hard coded in test.m. It was deemed easier, in the immediate term, to make two different functions to get the fusion results for validation and testing sets. </p>
+<p>Both sg_validate and sg_test are used in the same way - e.g.</p>
+<div class="highlight"><pre>sg_test(&#39;chair&#39;)
+</pre></div>
+
+
+<p>will produce the file:</p>
+<div class="highlight"><pre>chairData.mat
+</pre></div>
+
+
+<p>This file will contain the following variables:</p>
+<p>ap_all: area under Precision/Recall curve for each individal calssifier &amp; fused classifier
+bestu: best values for Hyungtae's u parameter (used to measure uncertainty of classification)
+bestn: best values for Hyungtae's n parameter (used to estimate best obtainable precision)</p>
+<p>bestdets: An N x 3 cell, where N = # of images used in the test set (if you'd prefer the validation set, this should be fairly straight-forward). The second and third column of each row contain, respectively, the image that was being examined and the class of object being sought. The first column of each row contains an M x 5 array with information on all the bounding boxes found for that image. M is the number of bounding boxes. The first four columns of each row give the upper left &amp; lower right hand corner of each bounding box. The fifth column gives the fused belief that a target lies within that bounding box. This fused belief is the difference between the probability mass associated with a target lying within the bounding box and the probability mass associated with a non-target lying there. It will be a number between -1 (non-target) and +1 (target). I do not know exactly how these measures correspond to probabilities.</p>
+<p>bestprior: a 4x3 array of parameters for each of the base classifiers used by Hyungtae to fuse predictions together. Each row contains the parameters for a classifier (I don't know which row corresponds to which classifier). The first column contains m(Trgt), m(~Trgt) &amp; m(Uncertain) for various thresholds. The second column contains an array with the corresponding thresholds.</p>
+<p>precRecData:  I modified Hyungtae's code to give this 1 x 3 cell containing precision and recall measures for various confidence thresholds for the given detector. The first column contains a 1 x 3 array with precision measures in the first row, recall measures in the second row and meaningless numbers I should have (and will) eliminate in the third row. The second column of precRecData contains the confidence thresholds that correspond to the precision &amp; recall measurements. The third column is empty.</p>
+<p>gnd_truth: An array with ground truth information for each image. If the bounding box (bbox) array is [], then the target object is not in the image, otherwise, bbox contains (leftmost pt, top most pt, right most point, bottom point) for the bounding box [check this]. I don't quite know what det &amp; obj contain, although det=[] seems to indicate no target to detect, but det=0 seems to indicate a target.</p>
+<p>This file should then be copied into the TestSetResults directory. In order to create these files for all 5 classes, just run:</p>
+<div class="highlight"><pre>sg_tests()
+</pre></div>
+
+
+<p>and then move the resulting files to ./TestSetResults. For the validation set, the corresponding sg_validate &amp; sg_validares work in the same way.</p>
+    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
